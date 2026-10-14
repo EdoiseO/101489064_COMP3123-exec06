@@ -1,0 +1,357 @@
+{
+  "info": {
+    "name": "COMP3123 Lab 6 — Phillip Onofua — 101489064",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Run in order against the actual Atlas-connected server. POST stores the new note ID. DELETE targets only that newly created capture-test note. No credentials included."
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8081"
+    },
+    {
+      "key": "noteId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "01 — Root welcome",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/"
+      }
+    },
+    {
+      "name": "02 — Create capture-test note",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+              "if (pm.response.code === 201) {",
+              "  const note = pm.response.json();",
+              "  pm.collectionVariables.set(\"noteId\", note._id);",
+              "  pm.test(\"Five note fields saved\", () => {",
+              "    [\"noteTitle\", \"noteDescription\", \"priority\", \"dateAdded\", \"dateUpdated\"].forEach(key => pm.expect(note).to.have.property(key));",
+              "  });",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"content\": {\n    \"noteTitle\": \"Sample Note Title\",\n    \"noteDescription\": \"Sample Note Description\",\n    \"priority\": \"HIGH\",\n    \"dateAdded\": \"06/Oct/2025\",\n    \"dateUpdated\": \"06/Oct/2025\"\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/api/notes"
+      }
+    },
+    {
+      "name": "03 — List all notes",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/notes"
+      }
+    },
+    {
+      "name": "04 — Get created note",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/notes/{{noteId}}"
+      }
+    },
+    {
+      "name": "05 — Update created note",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"content\": {\n    \"noteTitle\": \"Updated Note Title\",\n    \"noteDescription\": \"This note has been updated\",\n    \"priority\": \"MEDIUM\",\n    \"dateAdded\": \"06/Oct/2025\",\n    \"dateUpdated\": \"13/Oct/2026\"\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/api/notes/{{noteId}}"
+      }
+    },
+    {
+      "name": "06 — Confirm persisted update",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/notes/{{noteId}}"
+      }
+    },
+    {
+      "name": "07 — Delete only the created capture-test note",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/api/notes/{{noteId}}"
+      }
+    },
+    {
+      "name": "08 — Deleted note not found",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/notes/{{noteId}}"
+      }
+    },
+    {
+      "name": "09 — Missing POST content",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/api/notes"
+      }
+    },
+    {
+      "name": "10 — Invalid note ID",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/notes/not-a-valid-id"
+      }
+    },
+    {
+      "name": "11 — Missing PUT content",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/api/notes/{{noteId}}"
+      }
+    },
+    {
+      "name": "12 — Invalid priority",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"content\": {\n    \"noteTitle\": \"Sample Note Title\",\n    \"noteDescription\": \"Sample Note Description\",\n    \"priority\": \"INVALID\",\n    \"dateAdded\": \"06/Oct/2025\",\n    \"dateUpdated\": \"06/Oct/2025\"\n  }\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/api/notes"
+      }
+    },
+    {
+      "name": "13 — Malformed JSON",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"content\":",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/api/notes"
+      }
+    }
+  ]
+}
